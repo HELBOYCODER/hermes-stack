@@ -55,6 +55,9 @@ def env(name: str, default: str = "") -> str:
 
 def check_env() -> tuple[str, str]:
     missing = [k for k in REQUIRED if not env(k)]
+    if missing and DRY_RUN:
+        print(f"::warning:: Dry-run without {', '.join(missing)} — using placeholders (no HF calls will be made).")
+        return "dry-user", "dry-space"
     if missing:
         print(f"::error:: Missing required env/secrets: {', '.join(missing)}")
         print("::error:: Add HF_TOKEN / HF_USERNAME / HF_SPACE_NAME to the repo Secrets (the web wizard does this automatically).")

@@ -61,4 +61,4 @@ jobs:
         if: always()
         run: |
           echo "Deployment step finished."
-          echo "Space page: after a successful run, open https://huggingface.co/spaces/\${HF_USERNAME}/\${HF_SPACE_NAME}"
+          echo "After a successful run, open your Space from the Hugging Face website."
