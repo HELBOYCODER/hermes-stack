@@ -42,6 +42,7 @@ SPACE_VARIABLES = [
 REQUIRED = ["HF_TOKEN", "HF_USERNAME", "HF_SPACE_NAME"]
 
 DRY_RUN = os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+PRIVATE_SPACE = os.environ.get("PRIVATE_SPACE", "").lower() in ("1", "true", "yes")
 BUILD_TIMEOUT = int(os.environ.get("BUILD_TIMEOUT", "2700"))  # 45 min
 
 
@@ -88,6 +89,7 @@ def main() -> int:
     print(f" Target Space  : https://huggingface.co/spaces/{repo_id}")
     print(f" Backup dataset: {backup_repo} (private)")
     print(f" Mode          : {'DRY-RUN (no HF calls)' if DRY_RUN else 'LIVE'}")
+    print(f" Visibility    : {'PRIVATE' if PRIVATE_SPACE else 'public'}")
     print("=" * 62)
 
     if DRY_RUN:
@@ -121,11 +123,12 @@ def main() -> int:
         return 1
 
     # ------------------------------------------------------ create repos
-    print(f"[1/5] Creating (or reusing) Space {repo_id} (sdk=docker, cpu-basic)…")
+    print(f"[1/5] Creating (or reusing) Space {repo_id} (sdk=docker, cpu-basic, {'private' if PRIVATE_SPACE else 'public'})…")
     url = api.create_repo(
         repo_id=repo_id,
         repo_type="space",
         sdk="docker",
+        private=PRIVATE_SPACE,
         exist_ok=True,
         space_hardware="cpu-basic",
     )
@@ -191,21 +194,25 @@ def main() -> int:
                 print()
                 print("🎉 SPACE IS RUNNING!")
                 write_summary(
-                    "## 🎉 استقرار موفق — Space در حال اجراست!\n\n"
-                    f"| سرویس | آدرس |\n|---|---|\n"
+                    "## 🎉 Deployment successful — your Space is RUNNING!\n\n"
+                    f"| Service | URL |\n|---|---|\n"
                     f"| 🏠 Space | {space_url} |\n"
-                    f"| 🌐 9Router (روت) | {app_url} |\n"
-                    f"| 🧠 داشبورد هرمس | {app_url}/hermes/ |\n"
-                    f"| 🔌 API هرمس (OpenAI-compatible) | {app_url}/hermes-api/v1 |\n"
-                    f"| 💾 بکاپ‌ها | https://huggingface.co/datasets/{backup_repo} |\n\n"
-                    "**قدم بعدی:** در تلگرام به ربات `/start` بده و در cron-job.org یک پینگ ۲۵ دقیقه‌ای "
-                    f"به `{app_url}` بساز تا Space نخوابد."
+                    f"| 🌐 Router dashboard (root) | {app_url} |\n"
+                    f"| 🧠 Agent web dashboard | {app_url}/hermes/ |\n"
+                    f"| 🔌 Agent API (OpenAI-compatible) | {app_url}/hermes-api/v1 |\n"
+                    f"| 💾 Backups | https://huggingface.co/datasets/{backup_repo} |\n\n"
+                    "**Next steps**\n\n"
+                    "1. Open the Telegram bot and send `/start`.\n"
+                    "2. The `Keep Space Awake` GitHub Action (already in this repo) pings "
+                    "`/healthz` every 10 minutes — no external cron service needed.\n"
+                    "3. Change any value later in Space **Settings → Variables and secrets**, "
+                    "then restart the Space.\n"
                 )
                 return 0
             if stage in ("BUILD_ERROR", "RUN_ERROR", "CONFIG_ERROR", "NO_APP_FILE"):
                 print(f"::error:: Space entered error state: {stage}")
                 print(f"::error:: Logs: {space_url}/logs/build")
-                write_summary(f"## ❌ خطا در ساخت Space\n\nState: `{stage}`\n\n[Build logs]({space_url}/logs/build)")
+                write_summary(f"## ❌ Space build failed\n\nState: `{stage}`\n\n[Build logs]({space_url}/logs/build)")
                 return 1
         except Exception as e:
             print(f"      (runtime poll failed: {e} — retrying)")
@@ -213,9 +220,8 @@ def main() -> int:
 
     print(f"::warning:: Timed out after {BUILD_TIMEOUT}s — the build may still be running (large base images).")
     write_summary(
-        "## ⏳ ساخت هنوز تمام نشده\n\n"
-        f"Build ادامه دارد؛ چند دقیقه دیگر وضعیت را اینجا ببین: {space_url}\n\n"
-        "معمولاً اولین build به‌خاطر دانلود ایمیج‌های بزرگ ۱۰ تا ۲۵ دقیقه طول می‌کشد."
+        "## ⏳ Build still in progress\n\n"
+        f"The first build downloads large base images (10–25 min). Check the status here: {space_url}"
     )
     return 0
 

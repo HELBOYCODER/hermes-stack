@@ -13,12 +13,18 @@ truncate_log() {
 start_svc() {
     local name="$1"
     (
+        local fails=0 delay=5
         while true; do
             truncate_log "$name"
             echo "[$(date -u +%F\ %T)] starting $name ..."
             /opt/hfkit-kit/svc-"$name".sh
-            echo "[$(date -u +%F\ %T)] $name exited (rc=$?) — restart in 5s"
-            sleep 5
+            rc=$?
+            # exponential backoff 5s -> 10s -> 20s -> 40s -> 60s (cap)
+            # so a broken service never hammers the CPU (HF flags crash loops)
+            if [ "$rc" -eq 0 ]; then fails=0; delay=5; else fails=$((fails+1)); fi
+            [ "$fails" -gt 1 ] && delay=$(( delay < 60 ? delay*2 : 60 ))
+            echo "[$(date -u +%F\ %T)] $name exited (rc=$rc) — restart in ${delay}s"
+            sleep "$delay"
         done
     ) >>/opt/data/logs/"$name".log 2>&1 &
     disown 2>/dev/null || true

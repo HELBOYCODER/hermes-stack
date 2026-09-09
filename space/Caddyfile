@@ -1,6 +1,19 @@
 :7860 {
         encode zstd gzip
 
+        # ---- global hygiene headers (2026-style hardening) ----
+        header {
+                -Server
+                X-Content-Type-Options "nosniff"
+                Referrer-Policy "strict-origin-when-cross-origin"
+                X-Frame-Options "SAMEORIGIN"
+        }
+
+        # keep-alive / monitoring endpoint (GitHub Action pings this)
+        handle /healthz {
+                respond "ok" 200
+        }
+
         # nice redirect: /hermes -> /hermes/
         @hermesRoot path /hermes
         redir @hermesRoot /hermes/ 301

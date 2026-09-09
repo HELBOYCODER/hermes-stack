@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      private_space:
+        description: "🔒 Create the Space as PRIVATE (only you can open it)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -36,6 +41,7 @@ jobs:
       - name: 🛠️ Provision & deploy the Space
         env:
           DRY_RUN: ${{ inputs.dry_run }}
+          PRIVATE_SPACE: ${{ inputs.private_space }}
           # --- HF connection (set by the web wizard or manually) ---
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
