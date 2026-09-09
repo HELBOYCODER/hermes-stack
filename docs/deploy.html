@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ویزارد استقرار — Hermes Stack</title>
+<meta name="description" content="استقرار یک‌کلیکی Hermes Agent + 9Router + OmniRouter روی Hugging Face Spaces — ۱۰۰٪ داخل مرورگر">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070b1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b7cff'/%3E%3Cstop offset='1' stop-color='%233ee0ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M12 2l8 4.6v8.8L12 20l-8-4.6V6.6L12 2z' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%233ee0ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/800.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.2.5/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.2.5/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.2.5/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.2.5/700.css">
+<style>
+:root{
+  --bg0:#070b1a; --bg1:#0a1026; --bg2:#0d1430;
+  --panel:rgba(17,25,56,.6); --panel2:rgba(24,33,70,.5);
+  --bord:rgba(160,180,255,.1); --bord2:rgba(160,180,255,.2);
+  --ink:#eef2ff; --mut:#a6b0d4; --dim:#707ca6;
+  --vio:#8b7cff; --vio2:#b4a8ff; --cyan:#3ee0ff; --mint:#43f0c8;
+  --pink:#ff6ad5; --amber:#ffc35c; --rose:#ff7a8a;
+  --grad:linear-gradient(100deg,#8b7cff 5%,#3ee0ff 95%);
+  --grad2:linear-gradient(100deg,#ff6ad5 5%,#8b7cff 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --disp:'Space Grotesk','Vazirmatn',sans-serif;
+  --sans:'Vazirmatn',system-ui,sans-serif;
+  --r:22px; --rs:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg0);color:var(--ink);font-family:var(--sans);line-height:1.9;min-height:100vh;overflow-x:hidden}
+a{color:var(--cyan)} a:hover{filter:brightness(1.2)}
+::selection{background:rgba(139,124,255,.35)}
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+.aurora i:nth-child(1){width:520px;height:520px;background:#2a2070;top:-140px;inset-inline-start:-100px;animation:drift 26s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:460px;height:460px;background:#0c3a52;top:12%;inset-inline-end:-140px;animation:drift 32s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(3){width:380px;height:380px;background:#3a1440;bottom:-120px;inset-inline-start:30%;animation:drift 38s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-60px,60px) scale(1.15)}}
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.25),transparent),radial-gradient(1px 1px at 70% 15%,rgba(255,255,255,.2),transparent),radial-gradient(1.5px 1.5px at 45% 65%,rgba(255,255,255,.14),transparent),radial-gradient(1px 1px at 85% 55%,rgba(255,255,255,.22),transparent)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{padding:38px 0 6px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--disp);font-weight:700;font-size:19px;color:var(--ink);text-decoration:none}
+.logo svg{width:30px;height:30px}
+.hlink{font-size:13.5px;color:var(--mut);text-decoration:none;border:1px solid var(--bord2);padding:8px 16px;border-radius:999px}
+.hlink:hover{color:var(--ink);border-color:var(--vio)}
+h1{font-family:var(--disp);font-size:clamp(26px,5vw,40px);font-weight:800;margin:26px 0 6px;text-align:center}
+h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);text-align:center;max-width:640px;margin:0 auto 30px;font-size:15px}
+/* rail */
+.rail{display:flex;gap:0;justify-content:center;margin:26px 0 34px;position:relative}
+.rail::before{content:"";position:absolute;top:21px;inset-inline:18%;height:2px;background:var(--bord2);z-index:0}
+.rail .fillbar{position:absolute;top:21px;height:2px;background:var(--grad);z-index:1;transition:all .5s}
+.rnode{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;width:120px;cursor:default}
+.rdot{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:700;background:var(--bg1);border:2px solid var(--bord2);color:var(--dim);transition:.3s}
+.rnode.act .rdot{border-color:var(--vio);color:var(--vio2);box-shadow:0 0 0 6px rgba(139,124,255,.15);background:var(--bg2)}
+.rnode.done .rdot{border-color:var(--mint);color:var(--mint);background:rgba(67,240,200,.08)}
+.rlabel{font-size:12px;color:var(--dim);text-align:center}
+.rnode.act .rlabel{color:var(--ink)}
+/* steps */
+.step{display:none;animation:fadein .45s}
+.step.on{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:var(--panel);border:1px solid var(--bord);border-radius:var(--r);padding:clamp(22px,4vw,36px);box-shadow:0 30px 80px -30px rgba(3,6,20,.9)}
+.card h2{font-family:var(--disp);font-size:22px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.card .hint{color:var(--mut);font-size:14px;margin-bottom:22px}
+label{display:block;font-size:13.5px;font-weight:700;color:var(--mut);margin:16px 0 7px}
+.inrow{display:flex;gap:10px;align-items:stretch}
+input[type=text],input[type=password]{flex:1;width:100%;background:rgba(10,16,38,.75);border:1px solid var(--bord2);border-radius:12px;color:var(--ink);font-family:var(--mono);font-size:13.5px;padding:12px 15px;outline:none;transition:.2s;direction:ltr;text-align:left}
+input:focus{border-color:var(--vio);box-shadow:0 0 0 4px rgba(139,124,255,.13)}
+input::placeholder{color:#4a5478}
+.sbtn{background:rgba(139,124,255,.13);border:1px solid rgba(139,124,255,.4);color:var(--vio2);border-radius:12px;padding:0 18px;cursor:pointer;font-family:var(--sans);font-size:13.5px;font-weight:700;white-space:nowrap;transition:.2s}
+.sbtn:hover{background:rgba(139,124,255,.25)}
+.sbtn.cy{background:rgba(62,224,255,.1);border-color:rgba(62,224,255,.4);color:var(--cyan)}
+.sbtn:disabled{opacity:.45;cursor:wait}
+.status{display:none;margin-top:12px;padding:11px 15px;border-radius:12px;font-size:13.5px;line-height:1.8}
+.status.ok{display:block;background:rgba(67,240,200,.09);border:1px solid rgba(67,240,200,.35);color:var(--mint)}
+.status.err{display:block;background:rgba(255,122,138,.08);border:1px solid rgba(255,122,138,.35);color:var(--rose)}
+.status b{color:var(--ink)}
+.scopechip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;padding:3px 10px;border-radius:999px;margin-inline-end:6px}
+.scope-ok{background:rgba(67,240,200,.1);border:1px solid rgba(67,240,200,.4);color:var(--mint)}
+.scope-bad{background:rgba(255,122,138,.1);border:1px solid rgba(255,122,138,.4);color:var(--rose)}
+.tip{background:rgba(62,224,255,.06);border:1px solid rgba(62,224,255,.22);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--mut);margin:16px 0 4px;line-height:1.9}
+.tip a{color:var(--cyan)}
+.req{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;background:rgba(10,16,38,.5);border:1px solid var(--bord);border-radius:12px;margin-bottom:10px;font-size:14px}
+.req .n{width:26px;height:26px;flex-shrink:0;border-radius:8px;background:rgba(139,124,255,.15);border:1px solid rgba(139,124,255,.35);color:var(--vio2);font-family:var(--mono);font-size:12.5px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.req p{color:var(--mut)} .req b{color:var(--ink)}
+/* generated keys */
+.genrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.gk{background:rgba(10,16,38,.55);border:1px solid var(--bord);border-radius:14px;padding:14px 16px}
+.gk .gt{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.gk .gt b{font-size:13px;color:var(--mut)}
+.gk .gt .acts{display:flex;gap:6px}
+.gk .acts button{background:none;border:1px solid var(--bord2);color:var(--dim);border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.gk .acts button:hover{color:var(--ink);border-color:var(--vio)}
+.gk input{font-size:12.5px;padding:9px 12px}
+details.adv{margin-top:20px;border:1px dashed var(--bord2);border-radius:14px;overflow:hidden}
+details.adv summary{cursor:pointer;padding:13px 18px;font-size:13.5px;font-weight:700;color:var(--mut);list-style:none;user-select:none}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv .in{padding:4px 18px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 16px}
+details.adv select{width:100%;background:rgba(10,16,38,.75);border:1px solid var(--bord2);border-radius:12px;color:var(--ink);font-size:13.5px;padding:11px 13px;outline:none;font-family:var(--sans)}
+/* tg chips */
+.tgchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:rgba(67,240,200,.08);border:1px solid rgba(67,240,200,.35);color:var(--mint);border-radius:999px;padding:6px 13px;font-family:var(--mono);font-size:12.5px;cursor:pointer}
+.chip.off{background:rgba(10,16,38,.5);border-color:var(--bord2);color:var(--dim);text-decoration:line-through}
+.chip .x{color:inherit;opacity:.6}
+.picklist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pick{display:flex;align-items:center;gap:12px;background:rgba(10,16,38,.55);border:1px solid var(--bord2);border-radius:12px;padding:10px 14px;cursor:pointer;font-size:13.5px;transition:.2s}
+.pick:hover{border-color:var(--mint)}
+.pick .pid{font-family:var(--mono);color:var(--cyan);margin-inline-start:auto;font-size:12.5px}
+/* summary + deploy */
+.summ{background:rgba(10,16,38,.55);border:1px solid var(--bord);border-radius:14px;padding:16px 20px;font-size:13.5px;margin-bottom:18px}
+.summ .r{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px dashed var(--bord)}
+.summ .r:last-child{border-bottom:0}
+.summ .r span{color:var(--dim)} .summ .r b{color:var(--ink);font-family:var(--mono);font-size:12.5px;direction:ltr;unicode-bidi:embed}
+.summ .r b.cut{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chk{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;color:var(--mut);margin:16px 0;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:#8b7cff;margin-top:4px;flex-shrink:0}
+.bigbtn{width:100%;padding:17px;border:0;border-radius:16px;background:var(--grad);color:#0a0f24;font-family:var(--sans);font-size:17px;font-weight:800;cursor:pointer;transition:.25s;box-shadow:0 10px 50px -10px rgba(139,124,255,.4)}
+.bigbtn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08)}
+.bigbtn:disabled{opacity:.5;cursor:not-allowed}
+/* console */
+.console{display:none;margin-top:22px;background:#050813;border:1px solid var(--bord2);border-radius:14px;overflow:hidden}
+.console.on{display:block}
+.chead{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bord);background:rgba(17,25,56,.6);font-family:var(--mono);font-size:12px;color:var(--dim)}
+.chead .dots{display:flex;gap:5px}
+.chead .dots i{width:10px;height:10px;border-radius:50%;background:var(--bord2)}
+.chead .dots i:nth-child(1){background:#ff7a8a}.chead .dots i:nth-child(2){background:#ffc35c}.chead .dots i:nth-child(3){background:#43f0c8}
+.cbody{padding:14px 18px;font-family:'JetBrains Mono','Vazirmatn',monospace;font-size:12.3px;line-height:2;max-height:320px;overflow-y:auto;direction:rtl;text-align:right;white-space:pre-wrap;word-break:break-word}
+.cbody .t{color:#4a5478}
+.cbody .ok{color:var(--mint)} .cbody .err{color:var(--rose)} .cbody .st{color:var(--vio2);font-weight:700} .cbody .in{color:#9aa7d0} .cbody .warn{color:var(--amber)}
+.spin{display:inline-block;animation:sp 1.2s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* success */
+.success{display:none;text-align:center}
+.success.on{display:block}
+.success .big{font-size:52px;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:26px 0;text-align:right}
+.lk{background:rgba(10,16,38,.55);border:1px solid var(--bord);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.lk .lt{font-size:13px;color:var(--mut);display:flex;justify-content:space-between;align-items:center}
+.lk .lt b{color:var(--ink);font-size:13.5px}
+.lk .lv{font-family:var(--mono);font-size:11.8px;color:var(--cyan);direction:ltr;text-align:left;word-break:break-all;line-height:1.7}
+.lk button{align-self:flex-start;background:none;border:1px solid var(--bord2);color:var(--dim);border-radius:8px;font-size:11.5px;padding:4px 11px;cursor:pointer;font-family:var(--sans)}
+.lk button:hover{color:var(--ink);border-color:var(--vio)}
+.nxt{text-align:right;background:rgba(255,195,92,.06);border:1px solid rgba(255,195,92,.3);border-radius:14px;padding:16px 20px;margin-top:8px}
+.nxt h4{color:var(--amber);font-size:14px;margin-bottom:10px}
+.nxt ol{padding-inline-start:20px;color:var(--mut);font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+/* nav buttons */
+.navrow{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+.nb{padding:12px 26px;border-radius:14px;font-family:var(--sans);font-size:14.5px;font-weight:700;cursor:pointer;transition:.25s;border:1px solid var(--bord2);background:transparent;color:var(--mut)}
+.nb:hover{color:var(--ink);border-color:var(--vio)}
+.nb.go{background:var(--grad);color:#0a0f24;border:0;box-shadow:0 8px 40px -8px rgba(139,124,255,.45)}
+.nb.go:hover{filter:brightness(1.08)}
+.nb:disabled{opacity:.4;cursor:not-allowed}
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--bord2);color:var(--ink);padding:12px 22px;border-radius:12px;font-size:13.5px;z-index:99;transition:.35s;box-shadow:var(--shadow,0 20px 60px rgba(0,0,0,.5));opacity:0;pointer-events:none;max-width:90vw}
+#toast.on{transform:translateX(-50%);opacity:1}
+footer{text-align:center;color:var(--dim);font-size:12.5px;padding:40px 0 30px}
+.secnote{display:flex;gap:10px;align-items:flex-start;background:rgba(67,240,200,.05);border:1px solid rgba(67,240,200,.25);border-radius:12px;padding:12px 16px;font-size:12.8px;color:var(--mut);margin-top:18px;line-height:1.9}
+@media(max-width:640px){.rail .rlabel{display:none}.rnode{width:60px}.rail::before,.rail .fillbar{inset-inline:12%}}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="stars"></div>
+<div class="wrap">
+  <header>
+    <a class="logo" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7cff"/><stop offset="1" stop-color="#3ee0ff"/></linearGradient></defs><path d="M12 2l8 4.6v8.8L12 20l-8-4.6V6.6L12 2z" stroke="url(#lg)" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#3ee0ff"/></svg>
+      Hermes&nbsp;Stack <span style="font-size:11px;color:var(--dim);font-family:var(--mono);align-self:flex-end">/ wizard</span>
+    </a>
+    <a class="hlink" href="index.html">← صفحه اصلی</a>
+  </header>
+
+  <h1>ویزارد <span class="g">استقرار یک‌کلیکی</span></h1>
+  <p class="sub">ریپو می‌سازد، سکرت‌ها را رمزنگاری و ست می‌کند، GitHub Actions را اجرا می‌کند و تا سبز شدن Space کنارت می‌ماند. همه‌چیز ۱۰۰٪ داخل مرورگر خودت رخ می‌دهد.</p>
+
+  <div class="rail" id="rail">
+    <div class="rnode" data-s="1"><div class="rdot">1</div><div class="rlabel">دسترسی گیت‌هاب</div></div>
+    <div class="rnode" data-s="2"><div class="rdot">2</div><div class="rlabel">هاگینگ‌فیس</div></div>
+    <div class="rnode" data-s="3"><div class="rdot">3</div><div class="rlabel">ربات تلگرام</div></div>
+    <div class="rnode" data-s="4"><div class="rdot">4</div><div class="rlabel">کلیدها و رمزها</div></div>
+    <div class="rnode" data-s="5"><div class="rdot">5</div><div class="rlabel">استقرار</div></div>
+  </div>
+
+  <!-- ═══════════ STEP 1 — GitHub ═══════════ -->
+  <div class="step on" id="step1">
+    <div class="card">
+      <h2>🔑 دسترسی گیت‌هاب</h2>
+      <p class="hint">یک Personal Access Token با اسکوپ‌های <b>repo</b> و <b>workflow</b> لازم است تا ویزارد بتواند ریپو بسازد و سکرت‌ها را ست کند.</p>
+      <div class="req"><span class="n">1</span><p>روی <a href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=Hermes%20Stack%20Deployer" target="_blank" rel="noopener">این لینک آماده</a> بزن — صفحه ساخت توکن با تیک‌های درست باز می‌شود. نام بگذار، expiration انتخاب کن و <b>Generate token</b> را بزن.</p></div>
+      <div class="req"><span class="n">2</span><p>توکن ساخته‌شده (<code style="font-family:var(--mono);font-size:12px;color:var(--cyan)">ghp_…</code>) را کپی و اینجا بچسبان. توکن فقط در مرورگرت می‌ماند.</p></div>
+      <label for="ghpat">GitHub Personal Access Token</label>
+      <div class="inrow">
+        <input type="password" id="ghpat" placeholder="ghp_…" spellcheck="false" autocomplete="off">
+        <button class="sbtn" id="ghval">اعتبارسنجی</button>
+      </div>
+      <div class="status" id="ghstatus"></div>
+      <div class="secnote">🔒 ویزارد یک فایل استاتیک است؛ توکن‌ها فقط به <b>api.github.com</b>، <b>huggingface.co</b> و <b>api.telegram.org</b> می‌روند — نه هیچ سرور دیگری. بعد از اتمام استقرار، از همان صفحه گیت‌هاب توکن را حذف/rotate کن (الگوی امن).</div>
+      <div class="navrow"><span></span><button class="nb go" id="next1">مر بعدی ←</button></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 2 — Hugging Face ═══════════ -->
+  <div class="step" id="step2">
+    <div class="card">
+      <h2>🤗 توکن هاگینگ‌فیس</h2>
+      <p class="hint">توکن با نقش <b>write</b> لازم است تا Space ساخته شود، فایل‌ها آپلود شوند و سکرت‌های Space ست گردد.</p>
+      <div class="req"><span class="n">1</span><p>در <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">تنظیمات توکن‌ها</a> یک توکن جدید با نقش <b>Write</b> بساز (یا fine-grained با دسترسی Write به Contents).</p></div>
+      <label for="hftok">Hugging Face Access Token</label>
+      <div class="inrow">
+        <input type="password" id="hftok" placeholder="hf_…" spellcheck="false" autocomplete="off">
+        <button class="sbtn" id="hfval">اعتبارسنجی</button>
+      </div>
+      <div class="status" id="hfstatus"></div>
+      <label for="spacename">نام Space (انگلیسی، با خط تیره)</label>
+      <div class="inrow"><input type="text" id="spacename" value="hermes-stack" spellcheck="false"></div>
+      <div class="status" id="spstatus"></div>
+      <div class="tip">آدرس نهایی برنامه‌ات این شکلی می‌شود: <b id="appurlprev" style="font-family:var(--mono);font-size:12px;color:var(--cyan);direction:ltr">https://USER-hermes-stack.hf.space</b></div>
+      <div class="navrow"><button class="nb" id="prev2">→ مر قبل</button><button class="nb go" id="next2">مر بعدی ←</button></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 3 — Telegram ═══════════ -->
+  <div class="step" id="step3">
+    <div class="card">
+      <h2>💬 ربات تلگرام</h2>
+      <p class="hint">در تلگرام به <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> برو، دستور <b>/newbot</b> را بزن و توکن <code style="font-family:var(--mono);font-size:12px;color:var(--cyan)">123456:AA…</code> را اینجا بچسبان.</p>
+      <label for="tgtok">Telegram Bot Token</label>
+      <div class="inrow">
+        <input type="password" id="tgtok" placeholder="123456789:AA…" spellcheck="false" autocomplete="off">
+        <button class="sbtn" id="tgval">اعتبارسنجی</button>
+      </div>
+      <div class="status" id="tgstatus"></div>
+      <label for="tgids">کاربران مجاز (Telegram ID، با کاما)</label>
+      <div class="inrow">
+        <input type="text" id="tgids" placeholder="123456789, 987654321" spellcheck="false" dir="ltr" style="text-align:left">
+        <button class="sbtn cy" id="tgfetch">دریافت از پیام‌ها</button>
+      </div>
+      <div class="tip">برای «دریافت از پیام‌ها»: اول در تلگرام به ربات خودت یک <b>/start</b> بده (یا هر پیامی بفرست)، بعد این دکمه را بزن — ویزارد آخرین پیام‌دهنده‌ها را نشان می‌دهد؛ روی هر کدام بزنی انتخاب می‌شود. این کار جلوی استفاده‌ی دیگران از ربات تو را می‌گیرد.</div>
+      <div class="picklist" id="picklist"></div>
+      <div class="tgchips" id="tgchips"></div>
+      <div class="navrow"><button class="nb" id="prev3">→ مر قبل</button><button class="nb go" id="next3">مر بعدی ←</button></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 4 — Keys ═══════════ -->
+  <div class="step" id="step4">
+    <div class="card">
+      <h2>🔐 کلیدها و رمزها</h2>
+      <p class="hint">این‌ها به‌صورت خودکار و قوی ساخته شده‌اند — می‌توانی هرکدام را دوباره بسازی یا دستی عوض کنی. همه‌چیز بعداً به‌صورت Secret رمزنگاری‌شده ذخیره می‌شود.</p>
+      <div class="genrow">
+        <div class="gk"><div class="gt"><b>یوزر داشبورد هرمس</b></div><input type="text" id="k_dashuser" value="admin"></div>
+        <div class="gk"><div class="gt"><b>رمز داشبورد هرمس</b><span class="acts"><button title="ساخت مجدد" data-r="k_dashpass">🎲</button><button title="کپی" data-c="k_dashpass">📋</button></span></div><input type="text" id="k_dashpass"></div>
+        <div class="gk"><div class="gt"><b>کلید API هرمس (web-to-api)</b><span class="acts"><button data-r="k_hermekey">🎲</button><button data-c="k_hermekey">📋</button></span></div><input type="text" id="k_hermekey"></div>
+        <div class="gk"><div class="gt"><b>کلید API ۹روتر</b><span class="acts"><button data-r="k_9rkey">🎲</button><button data-c="k_9rkey">📋</button></span></div><input type="text" id="k_9rkey"></div>
+        <div class="gk"><div class="gt"><b>رمز اولیه داشبورد ۹روتر</b><span class="acts"><button data-r="k_routerpass">🎲</button><button data-c="k_routerpass">📋</button></span></div><input type="text" id="k_routerpass"></div>
+        <div class="gk"><div class="gt"><b>کلید OmniRouter</b><span class="acts"><button data-r="k_omnikey">🎲</button><button data-c="k_omnikey">📋</button></span></div><input type="text" id="k_omnikey"></div>
+        <div class="gk"><div class="gt"><b>رمز ادمین OmniRouter</b><span class="acts"><button data-r="k_omnipass">🎲</button><button data-c="k_omnipass">📋</button></span></div><input type="text" id="k_omnipass"></div>
+      </div>
+      <details class="adv">
+        <summary>⚙️ تنظیمات پیشرفته (اختیاری)</summary>
+        <div class="in">
+          <div><label for="reponame">نام ریپوی گیت‌هاب</label><input type="text" id="reponame" value="hermes-stack" spellcheck="false"></div>
+          <div><label for="hermesmodel">مدل پیش‌فرض هرمس (آیدی مدل در ۹روتر)</label><input type="text" id="hermesmodel" value="kiro-claude-sonnet-4.5" spellcheck="false" dir="ltr" style="text-align:left"></div>
+          <div><label for="backuprepo">ریپوی بکاپ (خالی = خودکار)</label><input type="text" id="backuprepo" placeholder="{user}/{space}-backup" spellcheck="false" dir="ltr" style="text-align:left"></div>
+          <div><label for="timezone">منطقه زمانی</label><select id="timezone"><option>Asia/Tehran</option><option>UTC</option><option>Asia/Dubai</option><option>Europe/Berlin</option></select></div>
+          <div><label for="omnienabled">OmniRouter</label><select id="omnienabled"><option value="true">فعال (پیشنهادی)</option><option value="false">غیرفعال</option></select></div>
+          <div><label for="webbackend">موتور جستجوی وب هرمس</label><select id="webbackend"><option value="tavily">tavily (کلید نمی‌خواهد)</option><option value="duckduckgo">duckduckgo</option></select></div>
+        </div>
+      </details>
+      <div class="tip">💡 مدل پیش‌فرض بعداً هم قابل تغییر است: در تنظیمات Space متغیر <b>HERMES_MODEL</b> را عوض کن و Restart بزن. آیدی دقیق مدل‌ها را داخل داشبورد ۹روتر (تب Models) ببین.</div>
+      <div class="navrow"><button class="nb" id="prev4">→ مر قبل</button><button class="nb go" id="next4">مر بعدی ←</button></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 5 — Deploy ═══════════ -->
+  <div class="step" id="step5">
+    <div class="card">
+      <h2>🚀 آماده استقرار</h2>
+      <p class="hint">چک‌لیست نهایی — اگر همه‌چیز درست است، دکمه را بزن و استراحت کن؛ بقیه‌اش خودکار است.</p>
+      <div class="summ" id="summary"></div>
+      <label class="chk"><input type="checkbox" id="agree"><span>می‌دانم توکن‌ها فقط به APIهای رسمی گیت‌هاب/هاگینگ‌فیس/تلگرام می‌روند و بعد از استقرار باید PAT را حذف یا rotate کنم.</span></label>
+      <button class="bigbtn" id="deploybtn" disabled>🚀 شروع استقرار</button>
+      <div class="console" id="console">
+        <div class="chead"><span class="dots"><i></i><i></i><i></i></span><span id="ctitle">deploy — hermes-stack</span><span style="margin-inline-start:auto" id="celapsed"></span></div>
+        <div class="cbody" id="cbody"></div>
+      </div>
+      <div class="success" id="success">
+        <div class="big">🎉</div>
+        <h2 style="margin-top:8px">استقرار کامل شد — <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">Space سبز است!</span></h2>
+        <p class="hint" style="margin-top:6px">همه‌چیز آماده است. لینک‌ها را نگه دار:</p>
+        <div class="lgrid" id="lgrid"></div>
+        <div class="nxt">
+          <h4>📌 چهار قدم آخر (۲ دقیقه)</h4>
+          <ol id="nextsteps"></ol>
+        </div>
+        <div style="margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a class="nb go" id="openapp" target="_blank" rel="noopener" href="#">باز کردن Space ↗</a>
+          <button class="nb" onclick="location.reload()">ویزارد جدید</button>
+        </div>
+      </div>
+      <div class="navrow" id="deploynav"><button class="nb" id="prev5">→ مر قبل</button><span></span></div>
+    </div>
+  </div>
+
+  <footer>Hermes Stack · ۱۰۰٪ client-side · ساخته‌شده توسط <a href="https://github.com/Godde3s" target="_blank" rel="noopener">Godde3s</a> · <a href="https://github.com/Godde3s/hermes-stack" target="_blank" rel="noopener">سورس</a></footer>
+</div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   BLAKE2b — adapted from blakejs v1.2.1 (MIT, © Blakejs
+   contributors, github.com/dcposch/blakejs). Streaming API only.
+   Used to build the libsodium "sealed box" nonce for GitHub
+   Actions secret encryption (crypto_box_seal).
+   ══════════════════════════════════════════════════════════════ */
+// <BLAKE2B-LIB>
+function ADD64AA(v,a,b){const o0=v[a]+v[b];let o1=v[a+1]+v[b+1];if(o0>=0x100000000)o1++;v[a]=o0;v[a+1]=o1}
+function ADD64AC(v,a,b0,b1){let o0=v[a]+b0;if(b0<0)o0+=0x100000000;let o1=v[a+1]+b1;if(o0>=0x100000000)o1++;v[a]=o0;v[a+1]=o1}
+function B2B_GET32(arr,i){return arr[i]^(arr[i+1]<<8)^(arr[i+2]<<16)^(arr[i+3]<<24)}
+const _m=new Uint32Array(32);
+function B2B_G(v,a,b,c,d,ix,iy){const x0=_m[ix],x1=_m[ix+1],y0=_m[iy],y1=_m[iy+1];
+ ADD64AA(v,a,b);ADD64AC(v,a,x0,x1);
+ let xor0=v[d]^v[a],xor1=v[d+1]^v[a+1];v[d]=xor1;v[d+1]=xor0;
+ ADD64AA(v,c,d);
+ xor0=v[b]^v[c];xor1=v[b+1]^v[c+1];v[b]=(xor0>>>24)^(xor1<<8);v[b+1]=(xor1>>>24)^(xor0<<8);
+ ADD64AA(v,a,b);ADD64AC(v,a,y0,y1);
+ xor0=v[d]^v[a];xor1=v[d+1]^v[a+1];v[d]=(xor0>>>16)^(xor1<<16);v[d+1]=(xor1>>>16)^(xor0<<16);
+ ADD64AA(v,c,d);
+ xor0=v[b]^v[c];xor1=v[b+1]^v[c+1];v[b]=(xor1>>>31)^(xor0<<1);v[b+1]=(xor0>>>31)^(xor1<<1)}
+const BLAKE2B_IV32=new Uint32Array([0xf3bcc908,0x6a09e667,0x84caa73b,0xbb67ae85,0xfe94f82b,0x3c6ef372,0x5f1d36f1,0xa54ff53a,0xade682d1,0x510e527f,0x2b3e6c1f,0x9b05688c,0xfb41bd6b,0x1f83d9ab,0x137e2179,0x5be0cd19]);
+const SIGMA8=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3,11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4,7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8,9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13,2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9,12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11,13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10,6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5,10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3];
+const SIGMA82=new Uint8Array(SIGMA8.map(x=>x*2));
+const _v=new Uint32Array(32);
+function blake2bCompress(ctx,last){let i=0;
+ for(i=0;i<16;i++){_v[i]=ctx.h[i];_v[i+16]=BLAKE2B_IV32[i]}
+ _v[24]=_v[24]^ctx.t;_v[25]=_v[25]^(ctx.t/0x100000000);
+ if(last){_v[28]=~_v[28];_v[29]=~_v[29]}
+ for(i=0;i<32;i++)_m[i]=B2B_GET32(ctx.b,4*i);
+ for(i=0;i<12;i++){
+  B2B_G(_v,0,8,16,24,SIGMA82[i*16+0],SIGMA82[i*16+1]);
+  B2B_G(_v,2,10,18,26,SIGMA82[i*16+2],SIGMA82[i*16+3]);
+  B2B_G(_v,4,12,20,28,SIGMA82[i*16+4],SIGMA82[i*16+5]);
+  B2B_G(_v,6,14,22,30,SIGMA82[i*16+6],SIGMA82[i*16+7]);
+  B2B_G(_v,0,10,20,30,SIGMA82[i*16+8],SIGMA82[i*16+9]);
+  B2B_G(_v,2,12,22,24,SIGMA82[i*16+10],SIGMA82[i*16+11]);
+  B2B_G(_v,4,14,16,26,SIGMA82[i*16+12],SIGMA82[i*16+13]);
+  B2B_G(_v,6,8,18,28,SIGMA82[i*16+14],SIGMA82[i*16+15])}
+ for(i=0;i<16;i++)ctx.h[i]=ctx.h[i]^_v[i]^_v[i+16]}
+function blake2bInit(outlen){if(outlen===0||outlen>64)throw new Error('Illegal output length');
+ const ctx={b:new Uint8Array(128),h:new Uint32Array(16),t:0,c:0,outlen:outlen};
+ const pb=new Uint8Array(64);pb[0]=outlen;pb[2]=1;pb[3]=1;
+ for(let i=0;i<16;i++)ctx.h[i]=BLAKE2B_IV32[i]^B2B_GET32(pb,i*4);
+ return ctx}
+function blake2bUpdate(ctx,input){for(let i=0;i<input.length;i++){if(ctx.c===128){ctx.t+=ctx.c;blake2bCompress(ctx,false);ctx.c=0}ctx.b[ctx.c++]=input[i]}}
+function blake2bFinal(ctx){ctx.t+=ctx.c;while(ctx.c<128)ctx.b[ctx.c++]=0;blake2bCompress(ctx,true);
+ const out=new Uint8Array(ctx.outlen);for(let i=0;i<ctx.outlen;i++)out[i]=ctx.h[i>>2]>>(8*(i&3));return out}
+// </BLAKE2B-LIB>
+
+/* ══════════════════════════════════════════════════════════════
+   Hermes Stack wizard — 100% client-side
+   ══════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const S={
+  pat:'', ghUser:'', hfToken:'', hfUser:'',
+  spaceName:'hermes-stack', repoName:'hermes-stack',
+  tgToken:'', tgBot:'', tgSkip:false, allowed:[],
+};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let toastT;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+function copyText(v){(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('📋 کپی شد')).catch(()=>{const i=document.createElement('textarea');i.value=v;document.body.appendChild(i);i.select();document.execCommand('copy');i.remove();toast('📋 کپی شد')})}
+function genStr(n){const cs='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';const b=new Uint8Array(n);crypto.getRandomValues(b);return Array.from(b,x=>cs[x%cs.length]).join('')}
+function templateRepo(){
+  const h=location.hostname||'';
+  if(h.endsWith('.github.io')&&h.split('.').length>2){
+    const owner=h.split('.')[0];
+    const repo=(location.pathname.split('/').filter(Boolean)[0])||'hermes-stack';
+    return owner+'/'+repo;
+  }
+  return 'Godde3s/hermes-stack';
+}
+function u8ToB64(u){let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+function b64ToU8(s){const b=atob(s.replace(/\s/g,''));const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+/* libsodium sealed box using tweetnacl + blake2b(24, epk || pk) */
+function sealBox(pkB64,secret){
+  if(typeof nacl==='undefined')throw new Error('کتابخانه رمزنگاری (tweetnacl) از CDN لود نشد — اینترنت/فیلترشکن را چک کن و صفحه را رفرش کن.');
+  const pk=b64ToU8(pkB64);
+  const msg=new TextEncoder().encode(secret);
+  const ek=nacl.box.keyPair();
+  const h=blake2bInit(24);blake2bUpdate(h,ek.publicKey);blake2bUpdate(h,pk);
+  const nonce=blake2bFinal(h);
+  const boxed=nacl.box(msg,nonce,pk,ek.secretKey);
+  const out=new Uint8Array(32+boxed.length);
+  out.set(ek.publicKey,0);out.set(boxed,32);
+  return u8ToB64(out);
+}
+async function gh(path,opts={}){
+  const r=await fetch('https://api.github.com'+path,{
+    ...opts,
+    headers:{'Authorization':'token '+S.pat,'Accept':'application/vnd.github+json','Content-Type':'application/json',...(opts.headers||{})}
+  });
+  if(!r.ok){
+    let d={};try{d=await r.json()}catch(_){}
+    const fa={401:'توکن گیت‌هاب نامعتبر یا منقضی است.',403:'دسترسی رد شد — اسکوپ‌های repo و workflow لازم است (یا rate-limit).',404:'ریپو یا مسیر پیدا نشد — نام ریپو را چک کن.',422:'درخواست رد شد: '+((d.message||'')+(d.errors?' '+d.errors.map(e=>e.message||'').join('، '):''))};
+    const e=new Error('GitHub '+r.status+': '+(fa[r.status]||d.message||r.statusText));
+    e.status=r.status;throw e;
+  }
+  return r.status===204?null:r.json();
+}
+/* ───────────── step navigation ───────────── */
+let cur=1;
+function railSync(){
+  document.querySelectorAll('.rnode').forEach(n=>{
+    const s=+n.dataset.s;n.classList.toggle('act',s===cur);n.classList.toggle('done',s<cur);
+    if(s<cur)n.querySelector('.rdot').textContent='✓';else n.querySelector('.rdot').textContent=s;
+  });
+}
+function go(n){
+  cur=n;
+  document.querySelectorAll('.step').forEach(x=>x.classList.remove('on'));
+  $('step'+n).classList.add('on');
+  railSync();
+  if(n===4)initKeys();
+  if(n===5)buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+/* ───────────── step 1: GitHub ───────────── */
+async function validateGH(){
+  const v=$('ghpat').value.trim();
+  if(!v){toast('توکن را وارد کن');return}
+  S.pat=v;
+  const st=$('ghstatus');st.className='status';st.innerHTML='⏳ در حال بررسی توکن…';st.style.display='block';
+  try{
+    const r=await fetch('https://api.github.com/user',{headers:{'Authorization':'token '+v,'Accept':'application/vnd.github+json'}});
+    if(!r.ok){
+      if(r.status===401){st.className='status err';st.innerHTML='❌ توکن نامعتبر یا منقضی است.'}
+      else{st.className='status err';st.innerHTML='❌ خطا '+r.status+' — دوباره تلاش کن'}
+      return;
+    }
+    const d=await r.json();
+    S.ghUser=d.login;
+    const scopes=(r.headers.get('x-oauth-scopes')||'').split(',').map(s=>s.trim());
+    const hasRepo=scopes.includes('repo'),hasWf=scopes.includes('workflow');
+    st.className='status ok';
+    st.innerHTML='✅ سلام <b>'+esc(d.login)+'</b>! توکن معتبر است.<br>اسکوپ‌ها: '+
+      '<span class="scopechip '+(hasRepo?'scope-ok':'scope-bad')+'">'+(hasRepo?'✔ repo':'✘ repo')+'</span>'+
+      '<span class="scopechip '+(hasWf?'scope-ok':'scope-bad')+'">'+(hasWf?'✔ workflow':'✘ workflow')+'</span>'+
+      (hasRepo&&hasWf?'':'<br>⚠️ اسکوپ‌های کم است — لینک آماده ساخت توکن در همین مرحله، بالای صفحه.');
+    $('next1').disabled=!(hasRepo&&hasWf);
+    if(!(hasRepo&&hasWf))toast('اسکوپ repo و workflow لازم است');
+  }catch(e){st.className='status err';st.innerHTML='❌ ارتباط با api.github.com برقرار نشد: '+esc(e.message)}
+}
+/* ───────────── step 2: HF ───────────── */
+function spaceUrlPreview(){
+  const u=(S.hfUser||'USER').toLowerCase(),n=($('spacename').value.trim()||'hermes-stack').toLowerCase();
+  $('appurlprev').textContent='https://'+u+'-'+n+'.hf.space';
+}
+async function validateHF(){
+  const v=$('hftok').value.trim();
+  if(!v){toast('توکن هاگینگ‌فیس را وارد کن');return}
+  S.hfToken=v;
+  const st=$('hfstatus');st.className='status';st.style.display='block';st.innerHTML='⏳ در حال بررسی…';
+  try{
+    const r=await fetch('https://huggingface.co/api/whoami-v2',{headers:{'Authorization':'Bearer '+v}});
+    if(!r.ok){st.className='status err';st.innerHTML=r.status===401?'❌ توکن نامعتبر است.':'❌ خطا '+r.status;return}
+    const d=await r.json();
+    S.hfUser=d.name;
+    const role=d.auth&&d.auth.accessToken?d.auth.accessToken.role:'?';
+    const ok=role==='write'||role==='fineGrained';
+    st.className='status '+(ok?'ok':'err');
+    st.innerHTML=(ok?'✅ ':'❌ ')+'اکانت <b>'+esc(d.name)+'</b> — نقش توکن: <b>'+esc(role)+'</b>'+
+      (ok?'':'<br>⚠️ نقش <b>Write</b> لازم است — در تنظیمات توکن‌ها نقش را عوض کن.');
+    spaceUrlPreview();
+  }catch(e){st.className='status err';st.innerHTML='❌ ارتباط با huggingface.co برقرار نشد: '+esc(e.message)}
+}
+/* ───────────── step 3: Telegram ───────────── */
+async function validateTG(){
+  const v=$('tgtok').value.trim();
+  if(!v){toast('توکن ربات را وارد کن');return}
+  S.tgToken=v;S.tgSkip=false;
+  const st=$('tgstatus');st.className='status';st.style.display='block';st.innerHTML='⏳ در حال بررسی…';
+  try{
+    const r=await fetch('https://api.telegram.org/bot'+v+'/getMe');
+    const d=await r.json();
+    if(!d.ok){st.className='status err';st.innerHTML='❌ توکن ربات معتبر نیست — از BotFather دوباره کپی کن.';return}
+    S.tgBot=d.result.username;
+    st.className='status ok';
+    st.innerHTML='✅ ربات <b>@'+esc(d.result.username)+'</b> ('+esc(d.result.first_name)+') شناسایی شد.';
+  }catch(e){st.className='status err';st.innerHTML='❌ ارتباط با api.telegram.org برقرار نشد.'}
+}
+async function tgFetchUpdates(){
+  const st=$('tgstatus');
+  if(!S.tgToken){toast('اول توکن ربات را اعتبارسنجی کن');return}
+  st.className='status';st.style.display='block';st.innerHTML='⏳ در حال خواندن آخرین پیام‌ها…';
+  try{
+    const r=await fetch('https://api.telegram.org/bot'+S.tgToken+'/getUpdates?limit=50');
+    const d=await r.json();
+    if(!d.ok){st.className='status err';st.innerHTML='❌ getUpdates ناموفق بود.';return}
+    const seen=new Map();
+    (d.result||[]).forEach(u=>{
+      const c=u.message&&u.message.chat;if(!c)return;
+      if(!seen.has(c.id))seen.set(c.id,c);
+    });
+    const list=[...seen.values()];
+    if(!list.length){
+      st.className='status';st.style.display='block';
+      st.innerHTML='📭 پیامی پیدا نشد — اول در تلگرام به ربات <b>/start</b> بده و دوباره امتحان کن.';
+      return;
+    }
+    st.className='status ok';st.innerHTML='👇 روی هر کاربر بزن تا به لیست مجاز اضافه/حذف شود.';
+    $('picklist').innerHTML=list.map(c=>
+      '<div class="pick" data-id="'+c.id+'"><span>'+esc((c.first_name||'')+' '+(c.last_name||''))+'</span>'+
+      '<span style="color:var(--dim)">'+esc(c.username?'@'+c.username:c.type)+'</span>'+
+      '<span class="pid">'+c.id+'</span></div>').join('');
+    document.querySelectorAll('.pick').forEach(p=>p.addEventListener('click',()=>{
+      const id=p.dataset.id;
+      if(S.allowed.includes(id))S.allowed=S.allowed.filter(x=>x!==id);else S.allowed.push(id);
+      renderTgChips();syncTgInput();
+      p.style.borderColor=S.allowed.includes(id)?'var(--mint)':'var(--bord2)';
+    }));
+  }catch(e){st.className='status err';st.innerHTML='❌ خطا در getUpdates.'}
+}
+function renderTgChips(){
+  $('tgchips').innerHTML=S.allowed.map(id=>'<span class="chip" data-id="'+esc(id)+'"><span class="x">✕</span>'+esc(id)+'</span>').join('');
+  document.querySelectorAll('#tgchips .chip').forEach(ch=>ch.addEventListener('click',()=>{
+    S.allowed=S.allowed.filter(x=>x!==ch.dataset.id);renderTgChips();syncTgInput();
+  }));
+}
+function syncTgInput(){$('tgids').value=S.allowed.join(', ')}
+/* ───────────── step 4: keys ───────────── */
+let keysInit=false;
+function initKeys(){
+  if(keysInit)return;keysInit=true;
+  $('k_dashpass').value=genStr(18);
+  $('k_hermekey').value='hs-'+genStr(28);
+  $('k_9rkey').value='9r-'+genStr(28);
+  $('k_routerpass').value=genStr(14);
+  $('k_omnikey').value='sk-omni-'+genStr(24);
+  $('k_omnipass').value=genStr(16);
+  document.querySelectorAll('[data-r]').forEach(b=>b.addEventListener('click',()=>{
+    const t=$(b.dataset.r);
+    const pre=(t.value.match(/^[a-z0-9]+-/i)&&!/^[0-9]/.test(t.value)&&t.id!=='k_dashpass'&&t.id!=='k_routerpass'&&t.id!=='k_omnipass')?t.value.split('-')[0]+'-':'';
+    t.value=pre+genStr(t.id==='k_routerpass'?14:18);
+  }));
+  document.querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>copyText($(b.dataset.c).value)));
+}
+/* ───────────── step 5: summary + deploy ───────────── */
+function buildSummary(){
+  S.spaceName=$('spacename').value.trim()||'hermes-stack';
+  S.repoName=$('reponame').value.trim()||'hermes-stack';
+  const backupRepo=$('backuprepo').value.trim()||(S.hfUser+'/'+S.spaceName+'-backup');
+  const app='https://'+(S.hfUser+'-'+S.spaceName).toLowerCase().replace(/[^a-z0-9-]+/g,'-')+'.hf.space';
+  const rows=[
+    ['🤗 Space','https://huggingface.co/spaces/'+S.hfUser+'/'+S.spaceName],
+    ['🌐 آدرس برنامه',app],
+    ['📦 ریپوی گیت‌هاب','github.com/'+S.ghUser+'/'+S.repoName],
+    ['🤖 ربات تلگرام',S.tgSkip?'(فعلاً بدون تلگرام)':'@'+S.tgBot],
+    ['👥 کاربران مجاز',S.allowed.length?S.allowed.join(', '):'—'],
+    ['🧠 مدل پیش‌فرض',$('hermesmodel').value.trim()],
+    ['💾 بکاپ ساعتی',backupRepo+' (خصوصی)'],
+  ];
+  $('summary').innerHTML=rows.map(r=>'<div class="r"><span>'+r[0]+'</span><b class="cut" title="'+esc(r[1])+'">'+esc(r[1])+'</b></div>').join('');
+}
+function logC(txt,cls){
+  const b=$('cbody');
+  const t=new Date().toLocaleTimeString('en-GB');
+  const line=document.createElement('div');
+  line.innerHTML='<span class="t">['+t+']</span> <span class="'+(cls||'in')+'">'+txt+'</span>';
+  b.appendChild(line);b.scrollTop=b.scrollHeight;
+}
+function setDeployUI(on){
+  $('deploybtn').disabled=on;$('prev5').disabled=on;
+  $('agree').disabled=on;
+}
+async function deploy(){
+  setDeployUI(true);
+  $('console').classList.add('on');
+  $('cbody').innerHTML='';
+  $('success').classList.remove('on');
+  const started=Date.now();
+  const tick=setInterval(()=>{$('celapsed').textContent=Math.floor((Date.now()-started)/1000)+'s'},500);
+  const repoFull=S.ghUser+'/'+S.repoName;
+  const spaceId=S.hfUser+'/'+S.spaceName;
+  const appUrl='https://'+(S.hfUser+'-'+S.spaceName).toLowerCase().replace(/[^a-z0-9-]+/g,'-')+'.hf.space';
+  try{
+    logC('🚀 استقرار Hermes Stack — همه‌چیز از مرورگر خودت اجرا می‌شود','st');
+    /* 1 — repo from template */
+    const tpl=templateRepo();
+    logC('STEP 1/6 · ساخت ریپو <'+repoFull+'> از قالب <'+tpl+'>','st');
+    try{
+      await gh('/repos/'+tpl+'/generate',{method:'POST',body:JSON.stringify({name:S.repoName,description:'🤖 Hermes Agent + 9Router + OmniRouter on a free Hugging Face Space — deployed via web wizard',private:false,include_all_branches:false})});
+      logC('repo created ✓','ok');
+    }catch(e){
+      if(e.status===422||/already/i.test(e.message)){
+        logC('repo already exists — reusing it','warn');
+        await gh('/repos/'+repoFull);
+      }else throw e;
+    }
+    /* 2 — secrets */
+    logC('STEP 2/6 · دریافت کلید عمومی رمزنگاری سکرت‌ها','st');
+    const pk=await gh('/repos/'+repoFull+'/actions/secrets/public-key');
+    const backupRepo=$('backuprepo').value.trim()||(S.hfUser+'/'+S.spaceName+'-backup');
+    const vals={
+      HF_TOKEN:S.hfToken, HF_USERNAME:S.hfUser, HF_SPACE_NAME:S.spaceName,
+      TELEGRAM_BOT_TOKEN:S.tgSkip?'':S.tgToken,
+      TELEGRAM_ALLOWED_USERS:S.allowed.join(', '),
+      DASHBOARD_USERNAME:$('k_dashuser').value.trim()||'admin',
+      DASHBOARD_PASSWORD:$('k_dashpass').value.trim(),
+      HERMES_API_KEY:$('k_hermekey').value.trim(),
+      NINEROUTER_API_KEY:$('k_9rkey').value.trim(),
+      ROUTER_INITIAL_PASSWORD:$('k_routerpass').value.trim(),
+      OMNI_ROUTER_KEY:$('k_omnikey').value.trim(),
+      OMNI_ADMIN_PASSWORD:$('k_omnipass').value.trim(),
+      BACKUP_REPO:backupRepo,
+      HERMES_MODEL:$('hermesmodel').value.trim(),
+      HERMES_TIMEZONE:$('timezone').value,
+      OMNI_ENABLED:$('omnienabled').value,
+      HERMES_WEB_BACKEND:$('webbackend').value,
+    };
+    const names=Object.keys(vals).filter(k=>vals[k]);
+    logC('STEP 3/6 · رمزنگاری و ست '+names.length+' سکرت (libsodium sealed-box)','st');
+    for(const k of names){
+      await gh('/repos/'+repoFull+'/actions/secrets/'+k,{method:'PUT',body:JSON.stringify({encrypted_value:sealBox(pk.key,vals[k]),key_id:pk.key_id})});
+      logC('secret '+k+' ✓','ok');
+    }
+    /* 3 — dispatch workflow */
+    logC('STEP 4/6 · اجرای GitHub Actions (deploy-to-hf.yml)','st');
+    await gh('/repos/'+repoFull+'/actions/workflows/deploy-to-hf.yml/dispatches',{method:'POST',body:JSON.stringify({ref:'main',inputs:{dry_run:'false'}})});
+    logC('workflow dispatched ✓','ok');
+    logC('👀 https://github.com/'+repoFull+'/actions','in');
+    /* 4 — wait for the run */
+    logC('STEP 5/6 · منتظر پایان ورک‌فلو (معمولاً ۲-۴ دقیقه)','st');
+    let runId=null,runOk=false,runFound=false;
+    for(let i=0;i<160;i++){
+      const d=await gh('/repos/'+repoFull+'/actions/runs?per_page=6');
+      const run=(d.workflow_runs||[]).filter(r=>r.event==='workflow_dispatch'&&r.head_branch==='main')
+        .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+      if(run){
+        runFound=true;runId=run.id;
+        if(run.status==='completed'){
+          if(run.conclusion==='success'){logC('workflow finished: success ✓ ('+Math.floor((Date.now()-started)/1000)+'s)','ok');runOk=true;break}
+          throw new Error('ورک‌فلو با وضعیت «'+run.conclusion+'» تمام شد — لاگ: https://github.com/'+repoFull+'/actions/runs/'+run.id);
+        }
+        if(i%2===0)logC('workflow: '+run.status+'…','in');
+      }else if(!runFound&&i>4){logC('در انتظار ثبت run…','in')}
+      await sleep(15000);
+    }
+    if(!runOk)throw new Error('زمان انتظار ورک‌فلو تمام شد — وضعیت را دستی چک کن: https://github.com/'+repoFull+'/actions');
+    /* 5 — wait for the Space to be RUNNING */
+    logC('STEP 6/6 · منتظر Build و اجرای Space روی هاگینگ‌فیس (اولین build معمولاً ۱۰-۲۵ دقیقه)','st');
+    const STAGE={NO_APP_FILE:'فایل‌ها هنوز در حال آپلود…',BUILDING:'🛠 Build (دانلود ایمیج‌های بزرگ…)',APP_STARTING:'⚡ راه‌اندازی سرویس‌ها…',RUNNING:'🟢 RUNNING',PAUSED:'⏸ متوقف',PAUSING:'⏸ در حال توقف',BUILD_ERROR:'❌ خطا در Build',RUN_ERROR:'❌ خطا در اجرا',CONFIG_ERROR:'❌ خطای کانفیگ',DELETING:'🗑'};
+    let last='',ok=false;
+    for(let i=0;i<110;i++){
+      const r=await fetch('https://huggingface.co/api/spaces/'+spaceId+'/runtime',{headers:{'Authorization':'Bearer '+S.hfToken}});
+      if(!r.ok){logC('runtime poll: HTTP '+r.status+' — retry','warn');await sleep(30000);continue}
+      const j=await r.json();
+      const st=j.stage||'?';
+      if(st!==last){
+        last=st;
+        logC('space: '+st+' — '+(STAGE[st]||''),'in');
+        if(st==='RUNNING'){ok=true;break}
+        if(/ERROR/.test(st))throw new Error('Space در وضعیت '+st+' قرار گرفت — لاگ‌ها: https://huggingface.co/spaces/'+spaceId+'/logs/build');
+      }
+      await sleep(30000);
+    }
+    if(!ok)throw new Error('Build خیلی طول کشید — احتمالاً هنوز ادامه دارد؛ اینجا را چک کن: https://huggingface.co/spaces/'+spaceId);
+    /* 6 — success */
+    clearInterval(tick);
+    logC('🎉 همه‌چیز آماده است!','ok');
+    const links=[
+      ['🏠 صفحه Space','https://huggingface.co/spaces/'+spaceId],
+      ['🌐 ۹روتر (روت)',appUrl+'/'],
+      ['🧠 داشبورد هرمس',appUrl+'/hermes/'],
+      ['🔌 API هرمس (OpenAI-compatible)',appUrl+'/hermes-api/v1'],
+      ['💾 دیتاست بکاپ','https://huggingface.co/datasets/'+backupRepo],
+    ];
+    $('lgrid').innerHTML=links.map(l=>'<div class="lk"><div class="lt"><b>'+l[0]+'</b></div><div class="lv">'+esc(l[1])+'</div><button data-u="'+esc(l[1])+'">کپی لینک</button></div>').join('');
+    document.querySelectorAll('#lgrid button').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.u)));
+    $('openapp').href=appUrl+'/';
+    $('nextsteps').innerHTML=[
+      'در تلگرام به ربات <b>@'+esc(S.tgBot||'bot')+'</b> بده <b>/start</b> — عامل باید جواب بدهد.',
+      'با رمز اولیه (Secret <b>ROUTER_INITIAL_PASSWORD</b>) وارد <b>داشبورد ۹روتر</b> شو، اکانت‌های رایگان را وصل کن و مطابقت <b>HERMES_MODEL</b> با تب Models را چک کن.',
+      'در <a href="https://cron-job.org" target="_blank" rel="noopener">cron-job.org</a> یک Cron هر ۵ دقیقه به <b>'+esc(appUrl)+'</b> بساز تا Space نخوابد.',
+      'GitHub PAT را از تنظیمات گیت‌هاب <b>حذف/rotate</b> کن — کارش تمام شده است. 🔒',
+    ].map(x=>'<li>'+x+'</li>').join('');
+    $('deploynav').style.display='none';
+    $('success').classList.add('on');
+    confetti();
+  }catch(e){
+    clearInterval(tick);
+    logC('❌ '+esc(e.message),'err');
+    logC('مشکل اغلب با اصلاح توکن‌ها و زدن دوباره‌ی دکمه حل می‌شود — اطلاعات مراحل قبلی حفظ شده.','warn');
+    setDeployUI(false);
+    $('deploybtn').textContent='🔁 تلاش دوباره';
+  }
+}
+/* confetti — tiny, dependency-free */
+function confetti(){
+  const c=document.createElement('canvas');
+  c.style.cssText='position:fixed;inset:0;z-index:98;pointer-events:none';
+  document.body.appendChild(c);
+  const x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#8b7cff','#3ee0ff','#43f0c8','#ff6ad5','#ffc35c'];
+  const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,r:4+Math.random()*5,cy:cols[Math.random()*cols.length|0],vy:2+Math.random()*3.4,vx:-1.5+Math.random()*3,a:Math.random()*Math.PI}));
+  let f=0;
+  (function anim(){
+    x.clearRect(0,0,c.width,c.height);f++;
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.08;
+      x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.cy;x.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6);x.restore()});
+    if(f<300)requestAnimationFrame(anim);else c.remove();
+  })();
+}
+/* ───────────── wiring ───────────── */
+$('ghval').addEventListener('click',validateGH);
+$('ghpat').addEventListener('keydown',e=>{if(e.key==='Enter')validateGH()});
+$('next1').addEventListener('click',()=>go(2));
+$('prev2').addEventListener('click',()=>go(1));
+$('hfval').addEventListener('click',validateHF);
+$('hftok').addEventListener('keydown',e=>{if(e.key==='Enter')validateHF()});
+$('spacename').addEventListener('input',()=>{spaceUrlPreview();
+  const v=$('spacename').value;
+  if(!/^[a-zA-Z0-9-_]*$/.test(v)){toast('فقط حروف انگلیسی، عدد، - و _');$('spacename').value=v.replace(/[^a-zA-Z0-9-_]/g,'')}
+});
+$('next2').addEventListener('click',()=>{
+  if(!S.hfUser){toast('اول توکن هاگینگ‌فیس را اعتبارسنجی کن');return}
+  if($('spacename').value.trim().length<2){toast('نام Space خیلی کوتاه است');return}
+  go(3);
+});
+$('prev3').addEventListener('click',()=>go(2));
+$('tgval').addEventListener('click',validateTG);
+$('tgtok').addEventListener('keydown',e=>{if(e.key==='Enter')validateTG()});
+$('tgfetch').addEventListener('click',tgFetchUpdates);
+$('next3').addEventListener('click',()=>{
+  if(!S.tgBot){
+    if(confirm('توکن ربات هنوز اعتبارسنجی نشده.\n\nOK = بدون تلگرام ادامه بده (بعداً می‌توانی Secret را دستی اضافه کنی)\nCancel = برمی‌گردم و توکن را می‌دهم')){
+      S.tgSkip=true;go(4);
+    }
+    return;
+  }
+  go(4);
+});
+$('prev4').addEventListener('click',()=>go(3));
+$('next4').addEventListener('click',()=>{
+  const req=[['k_dashpass','رمز داشبورد'],['k_hermekey','کلید API هرمس'],['k_9rkey','کلید API ۹روتر'],['k_routerpass','رمز ۹روتر']];
+  for(const [id,lbl] of req){if(!$(id).value.trim()){toast(lbl+' خالی است');$(id).focus();return}}
+  go(5);
+});
+$('prev5').addEventListener('click',()=>go(4));
+$('agree').addEventListener('change',e=>{$('deploybtn').disabled=!e.target.checked});
+$('deploybtn').addEventListener('click',deploy);
+go(1);
+</script>
+</body>
+</html>

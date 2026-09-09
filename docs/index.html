@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Hermes Stack — هرمس + ۹روتر روی هاگینگ‌فیس، با چند کلیک</title>
+<meta name="description" content="استقرار یک‌کلیکی Hermes Agent + 9Router + OmniRouter روی Hugging Face Spaces رایگان — ربات تلگرام، داشبورد وب، API سازگار با OpenAI و بکاپ ساعتی. بدون کارت بانکی، بدون سرور.">
+<meta name="theme-color" content="#070b1a">
+<meta property="og:title" content="Hermes Stack — هرمس + ۹روتر روی هاگینگ‌فیس">
+<meta property="og:description" content="ویزارد وب یک‌کلیکی: ریپو می‌سازد، سکرت‌ها را ست می‌کند، Space را بالا می‌آورد و تا سبز شدن صبر می‌کند. ۱۰۰٪ داخل مرورگر.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b7cff'/%3E%3Cstop offset='1' stop-color='%233ee0ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M12 2l8 4.6v8.8L12 20l-8-4.6V6.6L12 2z' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%233ee0ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/vazirmatn@5.2.5/800.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.2.5/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-grotesk@5.2.5/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.2.5/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.2.5/700.css">
+<style>
+:root{
+  --bg0:#070b1a; --bg1:#0a1026; --bg2:#0d1430;
+  --panel:rgba(17,25,56,.6); --panel2:rgba(24,33,70,.5);
+  --bord:rgba(160,180,255,.1); --bord2:rgba(160,180,255,.2);
+  --ink:#eef2ff; --mut:#a6b0d4; --dim:#707ca6;
+  --vio:#8b7cff; --vio2:#b4a8ff; --cyan:#3ee0ff; --mint:#43f0c8;
+  --pink:#ff6ad5; --amber:#ffc35c; --rose:#ff7a8a;
+  --grad:linear-gradient(100deg,#8b7cff 5%,#3ee0ff 95%);
+  --grad2:linear-gradient(100deg,#ff6ad5 5%,#8b7cff 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --disp:'Space Grotesk','Vazirmatn',sans-serif;
+  --sans:'Vazirmatn',system-ui,sans-serif;
+  --maxw:1180px; --r:22px; --rs:14px;
+  --sec:clamp(64px,9vw,110px);
+  --shadow:0 30px 80px -20px rgba(3,6,20,.85);
+  --glow-v:0 0 0 1px rgba(139,124,255,.25),0 10px 50px -10px rgba(139,124,255,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg0);color:var(--ink);font-family:var(--sans);line-height:1.9;overflow-x:hidden}
+::selection{background:rgba(139,124,255,.35)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+/* aurora */
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+.aurora i:nth-child(1){width:520px;height:520px;background:#2a2070;top:-140px;inset-inline-start:-100px;animation:drift 26s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:460px;height:460px;background:#0c3a52;top:12%;inset-inline-end:-140px;animation:drift 32s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(3){width:380px;height:380px;background:#3a1440;bottom:-120px;inset-inline-start:30%;animation:drift 38s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-60px,60px) scale(1.15)}}
+.stars{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.25),transparent),radial-gradient(1px 1px at 70% 15%,rgba(255,255,255,.2),transparent),radial-gradient(1.5px 1.5px at 45% 65%,rgba(255,255,255,.14),transparent),radial-gradient(1px 1px at 85% 55%,rgba(255,255,255,.22),transparent),radial-gradient(1px 1px at 12% 80%,rgba(255,255,255,.18),transparent)}
+/* nav */
+nav{position:fixed;top:0;inset-inline:0;z-index:50;backdrop-filter:blur(18px);background:rgba(7,11,26,.72);border-bottom:1px solid var(--bord)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:26px}
+.logo{display:flex;align-items:center;gap:11px;font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:.2px}
+.logo svg{width:30px;height:30px}
+.nav-links{display:flex;gap:22px;margin-inline-start:auto;font-size:14.5px;color:var(--mut)}
+.nav-links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:11px 22px;border-radius:999px;font-weight:700;font-size:14.5px;cursor:pointer;border:1px solid var(--bord2);transition:.25s;white-space:nowrap}
+.btn-grad{background:var(--grad);color:#0a0f24;border:0;box-shadow:var(--glow-v)}
+.btn-grad:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-ghost:hover{border-color:var(--vio);background:rgba(139,124,255,.08)}
+@media(max-width:840px){.nav-links{display:none}}
+/* hero */
+header{padding:clamp(120px,16vw,180px) 0 40px;text-align:center;position:relative}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.badge{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid var(--bord2);background:var(--panel);color:var(--mut)}
+.badge b{color:var(--cyan);font-weight:700}
+h1{font-family:var(--disp);font-size:clamp(38px,7vw,74px);line-height:1.25;font-weight:800;letter-spacing:-.5px}
+h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 .g2{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{max-width:720px;margin:22px auto 0;color:var(--mut);font-size:clamp(15.5px,2.2vw,18.5px)}
+.sub b{color:var(--vio2)}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:38px 0 18px}
+.hero-cta .btn{padding:15px 30px;font-size:16px}
+.note{color:var(--dim);font-size:13px;font-family:var(--mono)}
+/* ticker of services */
+.stackline{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:44px}
+.chip{display:flex;align-items:center;gap:9px;padding:10px 18px;border-radius:14px;border:1px solid var(--bord);background:var(--panel);font-size:14px}
+.chip em{font-style:normal;font-size:11px;color:var(--dim);font-family:var(--mono)}
+/* sections */
+section{padding:var(--sec) 0}
+.sec-head{text-align:center;margin-bottom:54px}
+.sec-head .kicker{font-family:var(--mono);font-size:12.5px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase}
+.sec-head h2{font-family:var(--disp);font-size:clamp(27px,4.6vw,44px);font-weight:700;margin-top:12px}
+.sec-head p{color:var(--mut);max-width:640px;margin:14px auto 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--bord);border-radius:var(--r);padding:28px;position:relative;overflow:hidden;transition:.3s}
+.card:hover{transform:translateY(-4px);border-color:var(--bord2);box-shadow:var(--shadow)}
+.card .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;background:rgba(139,124,255,.12);border:1px solid rgba(139,124,255,.25)}
+.card h3{font-size:18.5px;font-weight:700;margin-bottom:10px}
+.card p{color:var(--mut);font-size:14.5px}
+.card .tag{position:absolute;top:20px;inset-inline-end:20px;font-family:var(--mono);font-size:11px;color:var(--mint);border:1px solid rgba(67,240,200,.3);background:rgba(67,240,200,.07);padding:3px 10px;border-radius:999px}
+/* architecture */
+.arch{background:var(--panel2);border:1px solid var(--bord);border-radius:var(--r);padding:clamp(20px,4vw,44px);overflow-x:auto}
+.arch-in{min-width:640px;display:grid;grid-template-columns:1fr 90px 1.4fr;gap:14px;align-items:center}
+.arcbox{border:1px solid var(--bord2);border-radius:16px;padding:18px;background:rgba(10,16,38,.7)}
+.arcbox h4{font-family:var(--mono);font-size:12.5px;color:var(--cyan);margin-bottom:12px;letter-spacing:1px}
+.arcbox .row{display:flex;justify-content:space-between;gap:8px;padding:8px 11px;border-radius:10px;background:rgba(139,124,255,.06);border:1px solid var(--bord);margin-bottom:7px;font-size:13.5px}
+.arcbox .row:last-child{margin-bottom:0}
+.arcbox .row code{font-family:var(--mono);font-size:12px;color:var(--mint)}
+.arcbox .row span{color:var(--mut)}
+.arrows{display:flex;flex-direction:column;gap:6px;align-items:center;color:var(--vio);font-family:var(--mono);font-size:11px}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;counter-reset:st}
+.step{background:var(--panel);border:1px solid var(--bord);border-radius:var(--r);padding:30px 26px;position:relative}
+.step::before{counter-increment:st;content:"۰" counter(st);font-family:var(--disp);font-size:44px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;display:block;margin-bottom:8px}
+.step h3{font-size:17.5px;margin-bottom:10px}
+.step p{color:var(--mut);font-size:14.5px}
+.step a{color:var(--cyan);border-bottom:1px dashed rgba(62,224,255,.4)}
+/* compare */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.compare{grid-template-columns:1fr}}
+.cmp{border-radius:var(--r);border:1px solid var(--bord);padding:28px;background:var(--panel)}
+.cmp.win{border-color:rgba(67,240,200,.35);box-shadow:0 10px 60px -18px rgba(67,240,200,.25)}
+.cmp h3{display:flex;align-items:center;gap:10px;font-size:18px;margin-bottom:16px}
+.cmp ul{list-style:none}
+.cmp li{padding:9px 0;color:var(--mut);font-size:14.5px;display:flex;gap:10px;align-items:flex-start}
+.cmp li b{color:var(--ink)}
+.cmp li .mk{flex-shrink:0;margin-top:4px}
+.cmp.win li .mk{color:var(--mint)} .cmp.lose li .mk{color:var(--rose)}
+/* faq */
+.faq{max-width:820px;margin:0 auto}
+details{border:1px solid var(--bord);border-radius:16px;background:var(--panel);margin-bottom:12px;overflow:hidden}
+details[open]{border-color:var(--bord2)}
+summary{cursor:pointer;padding:19px 24px;font-weight:700;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:14px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--mono);color:var(--vio);font-size:22px;transition:.25s}
+details[open] summary::after{transform:rotate(45deg)}
+details .a{padding:0 24px 20px;color:var(--mut);font-size:14.5px}
+details .a code{font-family:var(--mono);font-size:12.5px;color:var(--cyan);background:rgba(62,224,255,.07);padding:2px 7px;border-radius:6px}
+details .a a{color:var(--cyan)}
+/* final cta */
+.final{text-align:center;background:radial-gradient(ellipse 70% 90% at 50% 110%,rgba(139,124,255,.22),transparent),var(--panel2);border:1px solid var(--bord);border-radius:26px;padding:clamp(44px,7vw,80px) 24px}
+.final h2{font-family:var(--disp);font-size:clamp(28px,5vw,46px);margin-bottom:14px}
+.final p{color:var(--mut);max-width:560px;margin:0 auto 30px}
+footer{border-top:1px solid var(--bord);padding:34px 0 44px;margin-top:40px}
+.foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;color:var(--dim);font-size:13.5px;align-items:center}
+.foot a{color:var(--mut)} .foot a:hover{color:var(--cyan)}
+.reveal{opacity:0;transform:translateY(26px);transition:.7s cubic-bezier(.2,.7,.3,1)}
+.reveal.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="stars"></div>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7cff"/><stop offset="1" stop-color="#3ee0ff"/></linearGradient></defs><path d="M12 2l8 4.6v8.8L12 20l-8-4.6V6.6L12 2z" stroke="url(#lg)" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#3ee0ff"/></svg>
+      Hermes&nbsp;Stack
+    </a>
+    <div class="nav-links">
+      <a href="#features">امکانات</a>
+      <a href="#arch">معماری</a>
+      <a href="#steps">۳ قدم</a>
+      <a href="#faq">سوالات</a>
+      <a href="https://github.com/Godde3s/hermes-stack" target="_blank">گیت‌هاب ↗</a>
+    </div>
+    <a class="btn btn-grad" href="deploy.html">⚡ شروع استقرار</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="badges">
+      <span class="badge">🤗 <b>Hugging Face Spaces</b> — رایگان</span>
+      <span class="badge">🇮🇷 بدون کارت بانکی · بدون KYC</span>
+      <span class="badge">⏱ استقرار <b>~۲۰ دقیقه</b></span>
+    </div>
+    <h1>کل استک هوش مصنوعی‌ات<br>روی <span class="g">یک Space رایگان</span> —<br>با <span class="g2">چند کلیک</span></h1>
+    <p class="sub"><b>Hermes Agent</b> تلگرامی + داشبورد وب + جستجوی زنده، <b>۹روتر</b> با داشبورد و کلید API، و <b>OmniRouter</b> با مدل‌های بدون‌کلید — همه در یک کانتینر، با بکاپ ساعتی خودکار و ویزارد نصب گرافیکی که همه‌چیز را خودش انجام می‌دهد.</p>
+    <div class="hero-cta">
+      <a class="btn btn-grad" href="deploy.html">⚡ استقرار یک‌کلیکی با ویزارد</a>
+      <a class="btn btn-ghost" href="https://github.com/Godde3s/hermes-stack" target="_blank">مشاهده ریپو ↗</a>
+    </div>
+    <div class="note">۱۰۰٪ داخل مرورگر · توکن‌ها فقط به APIهای رسمی می‌روند · بدون سرور واسط</div>
+    <div class="stackline">
+      <span class="chip">🧠 Hermes Agent <em> NousResearch</em></span>
+      <span class="chip">🌐 9Router <em>:20128</em></span>
+      <span class="chip">🔑 OmniRouter <em>:8080</em></span>
+      <span class="chip">🛡 Caddy <em>:7860</em></span>
+      <span class="chip">💾 Backup <em>ساعتی</em></span>
+    </div>
+  </div>
+</header>
+
+<section id="features" class="reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Features</div>
+      <h2>هر چیزی که از یک سرور واقعی انتظار داری</h2>
+      <p>یک Space رایگان هاگینگ‌فیس (۲vCPU · 16GB RAM) — بدون خواب اجباری روزانه، بدون محدودیت کارت، مدیریت کامل از تلگرام و مرورگر.</p>
+    </div>
+    <div class="grid">
+      <div class="card"><span class="tag">اولویت ۱</span><div class="ic">💬</div><h3>ربات تلگرام — کنترل کامل</h3><p>هرمس با polling رسمی وصل می‌شود؛ فقط توکن BotFather را می‌خواهد. چت، تحقیق، اجرای ابزار — همه از داخل تلگرام، فقط برای خودت (لیست مجاز ID).</p></div>
+      <div class="card"><div class="ic">🖥</div><h3>داشبورد وب هرمس</h3><p>علاوه بر تلگرام، داشبورد رسمی هرمس با احراز هویت روی مسیر <b>/hermes/</b> در دسترس است — با پشتیبانی رسمی reverse-proxy و پیشوند مسیر.</p></div>
+      <div class="card"><div class="ic">🔌</div><h3>Web-to-API سازگار با OpenAI</h3><p>خود عامل یک اندپوینت <b>/hermes-api/v1</b> با کلید اختصاصی می‌گیرد؛ هر کلاینت OpenAI-compatible می‌تواند مستقیم به آن وصل شود.</p></div>
+      <div class="card"><span class="tag">اولویت ۱</span><div class="ic">🌐</div><h3>۹روتر — پادشاه روت</h3><p>روت Space همان داشبورد ۹روتر است؛ مدل‌های رایگان/پولی را وصل کن، کلید API بساز و هرمس از همان مدل‌ها استفاده می‌کند (provider داخلی 127.0.0.1).</p></div>
+      <div class="card"><div class="ic">🔑</div><h3>OmniRouter بدون‌کلید</h3><p>فورک خودت (Godde3s) داخل همان کانتینر؛ Qwen و Gemini مهمان بدون هیچ کلیدی به هرمس اضافه می‌شوند و در ۹روتر هم قابل زنجیرکردن‌اند.</p></div>
+      <div class="card"><div class="ic">💾</div><h3>بکاپ ساعتی + ریستور</h3><p>دیسک Space ناپایدار است؛ ولی کل /opt/data هر ساعت در یک دیتاست خصوصی tar می‌شود و موقع هر ری‌استارت خودکار برمی‌گردد — حافظه‌ی عامل گم نمی‌شود.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="arch" class="reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Architecture</div>
+      <h2>یک کانتینر، چهار سرویس، یک در</h2>
+      <p>Caddy روی پورت اجباری ۷۸۶۰ همه‌چیز را می‌چیند؛ بقیه فقط localhost هستند.</p>
+    </div>
+    <div class="arch">
+      <div class="arch-in">
+        <div class="arcbox">
+          <h4>🌐 کاربران</h4>
+          <div class="row"><span>تلگرام (polling خروجی)</span><code>outbound</code></div>
+          <div class="row"><span>مرورگر تو</span><code>HTTPS</code></div>
+          <div class="row"><span>cron-job.org پینگ</span><code>keep-alive</code></div>
+        </div>
+        <div class="arrows"><span>─────◄</span><span>─────◄</span><span>─────◄</span></div>
+        <div class="arcbox">
+          <h4>🤗 HF Space · پورت 7860 · Caddy</h4>
+          <div class="row"><span>روت → داشبورد ۹روتر</span><code>:20128</code></div>
+          <div class="row"><span>/hermes/ → داشبورد هرمس (basic-auth)</span><code>:9119</code></div>
+          <div class="row"><span>/hermes-api/ → API هرمس</span><code>:8642</code></div>
+          <div class="row"><span>هرمس ← ninerouter + omnirouter</span><code>127.0.0.1</code></div>
+          <div class="row"><span>بکاپ ساعتی → دیتاست خصوصی</span><code>hf_hub</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="steps" class="reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Quick Start</div>
+      <h2>فقط ۳ قدم تا اجرا</h2>
+      <p>بقیه‌اش با ویزارد — ریپو می‌سازد، سکرت‌ها را رمزنگاری و ست می‌کند، Actions را اجرا می‌کند و لاگ زنده نشان می‌دهد.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>دو توکن بگیر</h3><p>یک <a href="https://github.com/settings/tokens/new?scopes=repo,workflow&description=Hermes%20Stack%20Deployer" target="_blank">GitHub PAT</a> (تیک‌های repo و workflow) و یک <a href="https://huggingface.co/settings/tokens" target="_blank">توکن write</a> هاگینگ‌فیس. ویزارد هر دو را همان‌جا اعتبارسنجی می‌کند.</p></div>
+      <div class="step"><h3>ویزارد را باز کن</h3><p>توکن ربات تلگرام از BotFather بده، IDهای مجاز را با یک کلیک از getUpdates بگیر، رمزها خودکار ساخته می‌شوند — بعد دکمه <b>استقرار</b> را بزن.</p></div>
+      <div class="step"><h3>لذت ببر 🎉</h3><p>وقتی Space سبز شد: به ربات <b>/start</b> بده، داشبورد را باز کن، و یک پینگ ۵ دقیقه‌ای در <a href="https://cron-job.org" target="_blank">cron-job.org</a> بساز تا همیشه روشن بماند.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Compare</div>
+      <h2>ویزارد یا راه دستی؟</h2>
+    </div>
+    <div class="compare">
+      <div class="cmp win">
+        <h3>⚡ ویزارد وب (پیشنهادی)</h3>
+        <ul>
+          <li><span class="mk">✔</span><span><b>~۵ دقیقه</b> کار انسانی — بقیه‌اش خودکار</span></li>
+          <li><span class="mk">✔</span><span>اعتبارسنجی زنده توکن‌ها (GitHub / HF / تلگرام)</span></li>
+          <li><span class="mk">✔</span><span>ساخت ریپو + ۱۴ Secret رمزنگاری‌شده با یک کلیک</span></li>
+          <li><span class="mk">✔</span><span>لاگ زنده تا سبز شدن Space + لینک‌های نهایی</span></li>
+          <li><span class="mk">✔</span><span>هیچ فایلی دستی کپی نمی‌شود</span></li>
+        </ul>
+      </div>
+      <div class="cmp lose">
+        <h3>🛠 راه دستی</h3>
+        <ul>
+          <li><span class="mk">✘</span><span>~۱۵ قدم دستی: ساخت Space، آپلود فایل‌ها، ست کردن تک‌تک Secrets</span></li>
+          <li><span class="mk">✘</span><span>احتمال اشتباه تایپی در نام متغیرها</span></li>
+          <li><span class="mk">✘</span><span>فقط به‌درد کسی می‌خورد که توکن به ویزارد ندهد</span></li>
+          <li><span class="mk">✔</span><span>به‌هرحال مستند است: <b><a href="https://github.com/Godde3s/hermes-stack/blob/main/docs/manual-deploy.md" target="_blank">manual-deploy.md</a></b></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="reveal">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">FAQ</div>
+      <h2>سوالات پرتکرار</h2>
+    </div>
+    <div class="faq">
+      <details><summary>واقعاً رایگان است؟ چه گیری‌هایی دارد؟</summary><div class="a">بله — Space با CPU Basic رایگان است: ۲vCPU، 16GB رم، دیسک ناپایدار و خواب بعد از ~۴۸ ساعت بدون ترافیک. ما دیسک ناپایدار را با بکاپ ساعتی + ریستور حل کرده‌ایم و خواب را با پینگ ۵ دقیقه‌ای cron-job.org. فقط صبور باش: اولین build چون دو ایمیج بزرگ دانلود می‌کند ۱۰ تا ۲۵ دقیقه طول می‌کشد.</div></details>
+      <details><summary>توکن‌هایم را کجا می‌فرستد؟ امن است؟</summary><div class="a">ویزارد یک فایل استاتیک است؛ توکن‌ها فقط در حافظه مرورگر می‌مانند و فقط به APIهای رسمی <code>api.github.com</code>، <code>huggingface.co</code> و <code>api.telegram.org</code> فرستاده می‌شوند. سکرت‌های گیت‌هاب با libsodium sealed-box رمزنگاری می‌شوند. هیچ سرور واسط، لاگ یا دیتابیسی وجود ندارد — می‌توانی قبل از اجرا سورس را بخوانی یا با F12 شبکه را رصد کنی. بعد از استقرار، توکن‌های قبلی را rotate کن (الگوی امن).</div></details>
+      <details><summary>مدل‌ها از کجا می‌آیند؟</summary><div class="a">سه راه: (۱) داخل داشبورد ۹روتر اکانت‌های رایگان (Kiro، OpenCode و…) را وصل کن — هرمس خودش همان‌ها را با <code>discover_models</code> پیدا می‌کند؛ (۲) OmniRouter مهمانِ بدون‌کلید (Qwen/Gemini) همیشه در دسترس است؛ (۳) هر کلید پولی که داشته باشی در همان داشبورد اضافه می‌شود.</div></details>
+      <details><summary>اگر Space ری‌استارت شود حافظه عامل می‌پرد؟</summary><div class="a">نه. بکاپ ساعتی کل <code>/opt/data</code> (کانفیگ، حافظه، تاریخچه، دیتای ۹روتر) را در دیتاست خصوصی ذخیره می‌کند و سرویس <code>01-restore.sh</code> موقع بوت برمی‌گرداندش. بیشترین چیزی که از دست می‌دهی ۵۹ دقیقه است.</div></details>
+      <details><summary>از ایران باز می‌شود؟</summary><div class="a">دامنه <code>*.hf.space</code> و huggingface.co معمولاً از ایران در دسترس‌اند؛ اگر خوانده نبود با تغییر DNS حل می‌شود. گیت‌هاب و ویزارد هم مستقیم باز می‌شوند. تلگرام که همیشه هست. 😉</div></details>
+      <details><summary>می‌خواهم بدون ویزارد انجامش بدهم</summary><div class="a">راهنمای کامل ۱۰ مرحله‌ای دستی: <a href="https://github.com/Godde3s/hermes-stack/blob/main/docs/manual-deploy.md" target="_blank">docs/manual-deploy.md</a> — یا ریپو را fork کن، Secret ها را بساز و در تب Actions روی Run workflow بزن. همان ورک‌فلو است، فقط بدون ویزارد.</div></details>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <div class="final">
+      <h2>امشب راهش ببین، <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">با چند کلیک</span></h2>
+      <p>دو توکن بگیر، ویزارد را باز کن و بقیه‌اش را تماشا کن — ریپو، سکرت‌ها، بیلد و Space سبز.</p>
+      <a class="btn btn-grad" href="deploy.html" style="padding:16px 36px;font-size:16.5px">⚡ باز کردن ویزارد استقرار</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>🤖 <b style="color:var(--ink)">Hermes Stack</b> — ساخته‌شده با ❤ توسط <a href="https://github.com/Godde3s" target="_blank">Godde3s</a></div>
+    <div><a href="https://godde3s.github.io/omnirouter/" target="_blank">OmniRouter ↗</a> · <a href="https://github.com/Godde3s/hermes-stack" target="_blank">GitHub ↗</a> · <a href="https://huggingface.co/spaces" target="_blank">HF Spaces ↗</a></div>
+  </div>
+</footer>
+
+<script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
