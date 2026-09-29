@@ -2,7 +2,7 @@
 title: AI Workspace
 emoji: 🛰️
 colorFrom: yellow
-colorTo: brown
+colorTo: pink
 sdk: docker
 app_port: 7860
 pinned: false
